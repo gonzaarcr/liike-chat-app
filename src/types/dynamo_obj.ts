@@ -1,6 +1,14 @@
-import { DeleteCommand, DynamoDBDocumentClient, GetCommand, PutCommand, ScanCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
-import { Message } from "./message";
+import {
+  DeleteCommand,
+  DynamoDBDocumentClient,
+  GetCommand,
+  PutCommand,
+  ScanCommand,
+  UpdateCommand,
+  QueryCommand,
+} from "@aws-sdk/lib-dynamodb";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import { Message } from "./message";
 
 export interface DynamodbTable<T> {
   TABLE_NAME: string;
@@ -87,6 +95,22 @@ export class MessagesTable implements DynamodbTable<Message> {
       TableName: this.TABLE_NAME,
     };
     const command = new ScanCommand(params);
+    const response = await this.docClient.send(command);
+    return response.Items as Message[];
+  }
+
+  async getByThread(threadId: string, n: number): Promise<Message[]> {
+    const params = {
+      TableName: this.TABLE_NAME,
+      IndexName: 'thread-id-index',
+      ExpressionAttributeValues: {
+        ":threadId": threadId,
+      },
+      KeyConditionExpression: "threadId = :threadId",
+      ScanIndexForward: false,
+      Limit: n,
+    };
+    const command = new QueryCommand(params);
     const response = await this.docClient.send(command);
     return response.Items as Message[];
   }

@@ -26,6 +26,7 @@ provider:
             - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.GROUPS_TABLE}"
             - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.THREADS_TABLE}"
             - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.MESSAGES_TABLE}"
+            - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.MESSAGES_TABLE}/index/*"
 
 functions:
   # Groups
@@ -151,6 +152,14 @@ functions:
           method: delete
           cors: true
 
+  getLastMessagesFromThread:
+    handler: src/threads/get_messages.handler
+    events:
+      - http:
+          path: api/threads/{id}/last
+          method: get
+          cors: true
+
   # Users
   createUser:
     handler: src/uers/create.handler
@@ -254,6 +263,12 @@ resources:
           -
             AttributeName: messageId
             AttributeType: S
+          -
+            AttributeName: threadId
+            AttributeType: S
+          -
+            AttributeName: createdAt
+            AttributeType: S
         KeySchema:
           -
             AttributeName: messageId
@@ -261,3 +276,16 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
+        GlobalSecondaryIndexes:
+          - IndexName: "thread-id-index"
+            KeySchema:
+              - AttributeName: "threadId"
+                KeyType: "HASH"
+              - AttributeName: "createdAt"
+                KeyType: "RANGE"
+            Projection:
+              ProjectionType: ALL
+            ProvisionedThroughput:
+              ReadCapacityUnits: 1
+              WriteCapacityUnits: 1
+          
