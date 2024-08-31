@@ -25,6 +25,7 @@ provider:
             - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.USERS_TABLE}"
             - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.GROUPS_TABLE}"
             - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.THREADS_TABLE}"
+            - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.THREADS_TABLE}/index/*"
             - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.MESSAGES_TABLE}"
             - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.MESSAGES_TABLE}/index/*"
 
@@ -68,6 +69,14 @@ functions:
       - http:
           path: api/groups/{id}
           method: delete
+          cors: true
+
+  getLastThreadsFromGroup:
+    handler: src/groups/get_threads.handler
+    events:
+      - http:
+          path: api/groups/{id}/last
+          method: get
           cors: true
 
   # Messages
@@ -246,6 +255,12 @@ resources:
           -
             AttributeName: threadId
             AttributeType: S
+          -
+            AttributeName: groupId
+            AttributeType: S
+          -
+            AttributeName: lastMessageAt
+            AttributeType: S
         KeySchema:
           -
             AttributeName: threadId
@@ -253,6 +268,18 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
+        GlobalSecondaryIndexes:
+          - IndexName: "group-id-index"
+            KeySchema:
+              - AttributeName: "groupId"
+                KeyType: "HASH"
+              - AttributeName: "lastMessageAt"
+                KeyType: "RANGE"
+            Projection:
+              ProjectionType: ALL
+            ProvisionedThroughput:
+              ReadCapacityUnits: 1
+              WriteCapacityUnits: 1
 
     MessagesDynamoDbTable:
       Type: 'AWS::DynamoDB::Table'

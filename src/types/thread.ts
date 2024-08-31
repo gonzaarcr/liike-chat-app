@@ -3,4 +3,6 @@ interface Thread {
   threadName: string;
   createdAt: string;
   color?: string;
+  groupId: string;
+  lastMessageAt: string;
 }

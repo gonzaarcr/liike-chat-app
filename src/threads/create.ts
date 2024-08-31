@@ -10,7 +10,9 @@ export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayPr
     createdAt: timestamp,
     threadId: uuid.v1(),
     threadName: data.threadName,
+    groupId: data.groupId,
     color: data?.color ?? "blue",
+    lastMessageAt: timestamp,
   }
   await new ThreadsTable().save(thread);
 

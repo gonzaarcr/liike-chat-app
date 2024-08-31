@@ -37,7 +37,7 @@ curl https://g26askhseg.execute-api.us-west-2.amazonaws.com/dev/api/groups/e245f
 
 curl -X POST https://g26askhseg.execute-api.us-west-2.amazonaws.com/dev/api/groups --data '{ "color": "color", "threadName": "new Thread name" }'
 
-curl -X PUT https://g26askhseg.execute-api.us-west-2.amazonaws.com/dev/api/groups/e245f4d0-671e-11ef-828c-114bb969ae28 --data '{ "color": "color", "threadName": "new Thread name" }'
+curl -X PUT https://g26askhseg.execute-api.us-west-2.amazonaws.com/dev/api/groups/e245f4d0-671e-11ef-828c-114bb969ae28 --data '{ "color": "color", "threadName": "new Thread name", "groupId": "group1" }'
 
 curl -X DELETE https://g26askhseg.execute-api.us-west-2.amazonaws.com/dev/api/groups/e245f4d0-671e-11ef-828c-114bb969ae28
 ```

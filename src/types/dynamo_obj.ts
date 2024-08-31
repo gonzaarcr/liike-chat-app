@@ -262,8 +262,23 @@ export class ThreadsTable implements DynamodbTable<Thread> {
     const response = await this.docClient.send(command);
     return response.Items as Thread[];
   }
-}
 
+  async getByGroup(groupId: string, n: number): Promise<Thread[]> {
+    const params = {
+      TableName: this.TABLE_NAME,
+      IndexName: 'group-id-index',
+      ExpressionAttributeValues: {
+        ":groupId": groupId,
+      },
+      KeyConditionExpression: "groupId = :groupId",
+      ScanIndexForward: false,
+      Limit: n,
+    };
+    const command = new QueryCommand(params);
+    const response = await this.docClient.send(command);
+    return response.Items as Thread[];
+  }
+}
 
 export class GroupsTable implements DynamodbTable<Group> {
   TABLE_NAME: string = process.env.GROUPS_TABLE;
