@@ -1,0 +1,263 @@
+service: chat-app
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: us-west-2
+  stage: dev
+  environment:
+    USERS_TABLE: ${self:service}-${opt:stage, self:provider.stage}-users
+    GROUPS_TABLE: ${self:service}-${opt:stage, self:provider.stage}-groups
+    THREADS_TABLE: ${self:service}-${opt:stage, self:provider.stage}-threads
+    MESSAGES_TABLE: ${self:service}-${opt:stage, self:provider.stage}-messages
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+          Resource:
+            - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.USERS_TABLE}"
+            - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.GROUPS_TABLE}"
+            - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.THREADS_TABLE}"
+            - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.MESSAGES_TABLE}"
+
+functions:
+  # Groups
+  createGroup:
+    handler: src/groups/create.handler
+    events:
+      - http:
+          path: api/groups
+          method: post
+          cors: true
+
+  listGroups:
+    handler: src/groups/list.handler
+    events:
+      - http:
+          path: api/groups
+          method: get
+          cors: true
+
+  getGroup:
+    handler: src/groups/get.handler
+    events:
+      - http:
+          path: api/groups/{id}
+          method: get
+          cors: true
+
+  updateGroup:
+    handler: src/groups/update.handler
+    events:
+      - http:
+          path: api/groups/{id}
+          method: put
+          cors: true
+
+  deleteGroup:
+    handler: src/groups/delete.handler
+    events:
+      - http:
+          path: api/groups/{id}
+          method: delete
+          cors: true
+
+  # Messages
+  createMessage:
+    handler: src/messages/create.handler
+    events:
+      - http:
+          path: api/messages
+          method: post
+          cors: true
+
+  listMessages:
+    handler: src/messages/list.handler
+    events:
+      - http:
+          path: api/messages
+          method: get
+          cors: true
+
+  getMessage:
+    handler: src/messages/get.handler
+    events:
+      - http:
+          path: api/messages/{id}
+          method: get
+          cors: true
+
+  updateMessage:
+    handler: src/messages/update.handler
+    events:
+      - http:
+          path: api/messages/{id}
+          method: put
+          cors: true
+
+  deleteMessage:
+    handler: src/messages/delete.handler
+    events:
+      - http:
+          path: api/messages/{id}
+          method: delete
+          cors: true
+
+  # Threads
+  createThread:
+    handler: src/threads/create.handler
+    events:
+      - http:
+          path: api/threads
+          method: post
+          cors: true
+
+  listThreads:
+    handler: src/threads/list.handler
+    events:
+      - http:
+          path: api/threads
+          method: get
+          cors: true
+
+  getThread:
+    handler: src/threads/get.handler
+    events:
+      - http:
+          path: api/threads/{id}
+          method: get
+          cors: true
+
+  updateThread:
+    handler: src/threads/update.handler
+    events:
+      - http:
+          path: api/threads/{id}
+          method: put
+          cors: true        
+
+  deleteThreads:
+    handler: src/threads/delete.handler
+    events:
+      - http:
+          path: api/threads/{id}
+          method: delete
+          cors: true
+
+  # Users
+  createUser:
+    handler: src/uers/create.handler
+    events:
+      - http:
+          path: api/users
+          method: post
+          cors: true
+
+  listUsers:
+    handler: src/users/list.handler
+    events:
+      - http:
+          path: api/users
+          method: get
+          cors: true
+
+  getUser:
+    handler: src/users/get.handler
+    events:
+      - http:
+          path: api/users/{id}
+          method: get
+          cors: true
+
+  updateUser:
+    handler: src/users/update.handler
+    events:
+      - http:
+          path: api/users/{id}
+          method: put
+          cors: true        
+
+  deleteUser:
+    handler: src/users/delete.handler
+    events:
+      - http:
+          path: api/users/{id}
+          method: delete
+          cors: true
+
+resources:
+  Resources:
+    UsersDynamoDbTable:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Retain
+      Properties:
+        TableName: ${self:provider.environment.USERS_TABLE}
+        AttributeDefinitions:
+          -
+            AttributeName: userId
+            AttributeType: S
+        KeySchema:
+          -
+            AttributeName: userId
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+
+    GroupsDynamoDbTable:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Retain
+      Properties:
+        TableName: ${self:provider.environment.GROUPS_TABLE}
+        AttributeDefinitions:
+          -
+            AttributeName: groupId
+            AttributeType: S
+        KeySchema:
+          -
+            AttributeName: groupId
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+
+    ThreadsDynamoDbTable:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Retain
+      Properties:
+        TableName: ${self:provider.environment.THREADS_TABLE}
+        AttributeDefinitions:
+          -
+            AttributeName: threadId
+            AttributeType: S
+        KeySchema:
+          -
+            AttributeName: threadId
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+
+    MessagesDynamoDbTable:
+      Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Retain
+      Properties:
+        TableName: ${self:provider.environment.MESSAGES_TABLE}
+        AttributeDefinitions:
+          -
+            AttributeName: messageId
+            AttributeType: S
+        KeySchema:
+          -
+            AttributeName: messageId
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
