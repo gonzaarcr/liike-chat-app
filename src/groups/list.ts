@@ -1,4 +1,4 @@
-import { GroupsTable } from "../types/dynamo_obj.js";
+import { GroupsTable } from "../types/dynamo_obj";
 
 export const handler = async () => {
   const messages = await new GroupsTable().getLastN();

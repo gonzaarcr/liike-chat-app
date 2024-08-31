@@ -1,4 +1,4 @@
-import { MessagesTable } from "../types/dynamo_obj.js";
+import { MessagesTable } from "../types/dynamo_obj";
 
 export const handler = async () => {
   const messages = await new MessagesTable().getLastN();

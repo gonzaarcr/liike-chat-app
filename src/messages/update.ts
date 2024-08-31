@@ -1,7 +1,14 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { MessagesTable } from "../types/dynamo_obj.js";
+import { MessagesTable } from "../types/dynamo_obj";
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+  if (!event.pathParameters?.id || !event.body) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ message: "Invalid query parameter: 'id' is missing" }),
+    };
+  }
+
   const data = JSON.parse(event.body);
   const response = await new MessagesTable().edit(event.pathParameters.id, data)
 
