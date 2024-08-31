@@ -171,7 +171,7 @@ functions:
 
   # Users
   createUser:
-    handler: src/uers/create.handler
+    handler: src/users/create.handler
     events:
       - http:
           path: api/users
@@ -315,4 +315,6 @@ resources:
             ProvisionedThroughput:
               ReadCapacityUnits: 1
               WriteCapacityUnits: 1
-          
+
+plugins:
+  - serverless-plugin-typescript

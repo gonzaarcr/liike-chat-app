@@ -23,7 +23,7 @@ export interface DynamodbTable<T> {
 }
 
 export class MessagesTable implements DynamodbTable<Message> {
-  TABLE_NAME: string = process.env.MESSAGES_TABLE;
+  TABLE_NAME: string = process.env.MESSAGES_TABLE!!;
   client: DynamoDBClient;
   docClient: DynamoDBDocumentClient;
 
@@ -117,7 +117,7 @@ export class MessagesTable implements DynamodbTable<Message> {
 }
 
 export class UsersTable implements DynamodbTable<User> {
-  TABLE_NAME: string = process.env.USERS_TABLE;
+  TABLE_NAME: string = process.env.USERS_TABLE!!;
   client: DynamoDBClient;
   docClient: DynamoDBDocumentClient;
 
@@ -191,7 +191,7 @@ export class UsersTable implements DynamodbTable<User> {
 }
 
 export class ThreadsTable implements DynamodbTable<Thread> {
-  TABLE_NAME: string = process.env.THREADS_TABLE;
+  TABLE_NAME: string = process.env.THREADS_TABLE!!;
   client: DynamoDBClient;
   docClient: DynamoDBDocumentClient;
 
@@ -281,7 +281,7 @@ export class ThreadsTable implements DynamodbTable<Thread> {
 }
 
 export class GroupsTable implements DynamodbTable<Group> {
-  TABLE_NAME: string = process.env.GROUPS_TABLE;
+  TABLE_NAME: string = process.env.GROUPS_TABLE!!;
   client: DynamoDBClient;
   docClient: DynamoDBDocumentClient;
 
