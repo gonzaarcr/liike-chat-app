@@ -5,6 +5,9 @@ provider:
   runtime: nodejs18.x
   region: us-west-2
   stage: dev
+  websocketsApiName: custom-websockets-api-name
+  websocketsApiRouteSelectionExpression: $request.body.action
+  websocketsDescription: Custom Serverless Websockets
   environment:
     USERS_TABLE: ${self:service}-${opt:stage, self:provider.stage}-users
     GROUPS_TABLE: ${self:service}-${opt:stage, self:provider.stage}-groups
@@ -28,8 +31,38 @@ provider:
             - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.THREADS_TABLE}/index/*"
             - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.MESSAGES_TABLE}"
             - "arn:aws:dynamodb:${opt:region, self:provider.region}:*:table/${self:provider.environment.MESSAGES_TABLE}/index/*"
+        - Effect: Allow
+          Action:
+            - apigateway:ManageConnections
+            - apigateway:PostToConnection
+            - apigateway:Invoke
+            - execute-api:Invoke
+          Resource: '*'
 
 functions:
+  # Websocket
+  connectHandler:
+    handler: src/websocket/handler.connectHandler
+    events:
+      - websocket: $connect
+
+  disconnectHandler:
+    handler: src/websocket/handler.disconnectHandler
+    events:
+      - websocket:
+          route: $disconnect
+
+  helloHandler:
+    handler: src/websocket/handler.helloHandler
+    events:
+      - websocket: $default
+  
+  sendMessage:
+    handler: src/websocket/handler.sendMessage
+    events:
+      - websocket:
+          route: sendMessage
+
   # Groups
   createGroup:
     handler: src/groups/create.handler
