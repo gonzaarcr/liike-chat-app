@@ -1,10 +1,11 @@
 import { mockClient } from "aws-sdk-client-mock";
-import { DeleteCommand, DynamoDBDocumentClient, GetCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
+import { DeleteCommand, DynamoDBDocumentClient, GetCommand, QueryCommand, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { Message } from "../src/types/message";
 import { handler as createHandler } from "../src/messages/create"
 import { handler as editHandler } from "../src/messages/update"
 import { handler as deleteHandler } from "../src/messages/delete"
 import { handler as getHandler } from "../src/messages/get"
+import { handler as getByThreadHandler } from "../src/threads/get_messages"
 
 process.env.GROUPS_TABLE = 'chat-app-dev-users'
 process.env.THREADS_TABLE = 'chat-app-dev-threads'
@@ -96,5 +97,49 @@ describe("Dynamo DB", () => {
     //@ts-ignore
     const r = await deleteHandler({ pathParameters: { id: mockMsg.messageId } });
     expect(r.statusCode).toStrictEqual(200);
+  });
+
+  it("should get messages by thread", async () => {
+    const mockMsgs: Message[] = [{
+      groupId: "g",
+      messageId: "id1",
+      content: "a",
+      createdAt: "2022-01-31T09:23:16.662Z",
+      senderUserId: "a",
+      threadId: "thread1"
+    }, {
+      groupId: "g",
+      messageId: "id0",
+      content: "a",
+      createdAt: "2022-01-31T09:21:16.662Z",
+      senderUserId: "a",
+      threadId: "thread1"
+    }]
+    const targetThreadId = "thread1"
+    ddbMock.on(QueryCommand, {
+      ExpressionAttributeValues: {
+        ":threadId": targetThreadId,
+      },
+      KeyConditionExpression: "threadId = :threadId",
+    }).resolves({
+      Items: mockMsgs.filter(m => m.threadId === targetThreadId)
+    }).on(QueryCommand, {
+      ExpressionAttributeValues: {
+        ":threadId": "another thread",
+      },
+      KeyConditionExpression: "threadId = :threadId",
+    }).resolves({ Items: [] });
+
+    //@ts-ignore
+    const r = await getByThreadHandler({ pathParameters: { id: targetThreadId } });
+    expect(r.statusCode).toStrictEqual(200);
+    const body = JSON.parse(r.body) as Message[];
+    expect(body.length).toStrictEqual(2);
+
+    //@ts-ignore
+    const r2 = await getByThreadHandler({ pathParameters: { id: "another thread" } });
+    expect(r2.statusCode).toStrictEqual(200);
+    const body2 = JSON.parse(r2.body) as Message[];
+    expect(body2.length).toStrictEqual(0);
   });
 })
