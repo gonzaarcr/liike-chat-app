@@ -1,7 +1,7 @@
 import * as uuid from 'uuid'
 import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { MessagesTable } from '../types/dynamo_obj.js';
-import { Message } from '../types/message.js';
+import { MessagesTable } from '../types/dynamo_obj';
+import { Message } from '../types/message';
 
 export const handler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
   if (!event.body) {
